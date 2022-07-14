@@ -1,5 +1,7 @@
 package org.todo.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -12,38 +14,27 @@ import org.todo.model.user.UserAlreadyExistsException;
 
 import java.io.IOException;
 
-@WebServlet("/userAdmin")
+@WebServlet("/api/users/*")
 public class UserAdminServlet extends HttpServlet {
 
-    private static final UserAdmin userAdmin = UserAdmin.getInstance();
+    private final static UserAdmin userAdmin = UserAdmin.getInstance();
+    private final static ObjectMapper objectMapper = ObjectMapperFactory.createObjectMapper();
 
     @Override
-    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String action = request.getParameter("action");
-        String username = request.getParameter("username");
-        String password = request.getParameter("password");
-        User user = null;
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
-            switch (action) {
-                case "register":
-                    user = userAdmin.registerUser(username, password);
-                    break;
-                case "login":
-                    user = userAdmin.loginUser(username, password);
-                    break;
-                case "logout":
-                    request.getSession().invalidate();
+            User user = objectMapper.readValue(request.getInputStream(), User.class);
+            if (user.getName() == null || user.getName().isEmpty() ||
+                    user.getPassword() == null || user.getPassword().isEmpty()) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                return;
             }
-        } catch (InvalidCredentialsException ex) {
-            request.setAttribute("message", "Invalid name or password");
+            userAdmin.registerUser(user.getName(), user.getPassword());
+            response.setStatus(HttpServletResponse.SC_CREATED);
+        } catch (JsonProcessingException ex) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         } catch (UserAlreadyExistsException ex) {
-            request.setAttribute("message", "User already exists");
-        }
-        if (user != null) {
-            request.getSession().setAttribute("user", user);
-            response.sendRedirect(request.getContextPath() + "todoList");
-        } else {
-            request.getRequestDispatcher("login.jsp").forward(request, response);
+            response.setStatus(HttpServletResponse.SC_CONFLICT);
         }
     }
 }

@@ -12,14 +12,18 @@ a, a:visited {
     text-decoration: none;
 }
 
+a.disabled {
+    color: grey;
+}
+
+nav {
+    float: right;
+}
+
 h1 {
     font-size: 2em;
     font-weight: normal;
     text-transform: capitalize;
-}
-
-form {
-    display: inline;
 }
 
 input, select {
@@ -31,9 +35,19 @@ input, select {
     width: 100%;
 }
 
+ul {
+    list-style: none;
+    margin: 20px 0;
+    padding: 0;
+}
+
+li.todo {
+    border: 1px solid grey;
+    padding: 10px;
+    margin: 10px 0;
+}
+
 button {
-    background-color: royalblue;
-    color: white;
     cursor: pointer;
     border: transparent;
     font: inherit;
@@ -41,10 +55,22 @@ button {
     min-width: 100px;
 }
 
-.todo {
-    border: 1px solid grey;
-    padding: 10px;
-    margin: 0 0 10px 0;
+button.primary {
+    background-color: royalblue;
+    color: white;
+}
+
+button.secondary {
+    background-color: lightgrey;
+    color: black;
+}
+
+footer {
+    margin: 20px 0;
+}
+
+.info {
+    color: black;
 }
 
 .error {
